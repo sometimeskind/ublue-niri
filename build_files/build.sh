@@ -8,7 +8,9 @@ cp -avf "/ctx/system_files"/. /
 ### niri desktop stack — everything from Fedora repos
 # base-main ships no desktop environment: niri is the only session, greetd +
 # tuigreet is the login path, Ptyxis the terminal. xwayland-satellite is
-# auto-spawned by niri for X11 clients.
+# auto-spawned by niri for X11 clients. grim/slurp/swappy/zbar back the
+# capture keybinds in dotfiles; ddcutil gives DMS external-monitor
+# brightness over DDC/CI (i2c-dev loaded via /etc/modules-load.d).
 dnf5 install -y \
     niri \
     xwayland-satellite \
@@ -17,6 +19,11 @@ dnf5 install -y \
     ptyxis \
     cliphist \
     wl-clipboard \
+    grim \
+    slurp \
+    swappy \
+    zbar \
+    ddcutil \
     matugen \
     cascadia-code-nf-fonts \
     rsms-inter-fonts \
