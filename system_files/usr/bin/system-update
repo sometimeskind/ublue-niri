@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# One command to update everything: OS image (bootc), Flatpaks, brew.
+set -euo pipefail
+
+sudo bootc upgrade
+flatpak update -y
+if command -v brew &>/dev/null; then
+    brew upgrade
+fi
+
+echo "system-update done. If bootc staged a new image, reboot to activate it."

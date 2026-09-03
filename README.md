@@ -18,6 +18,9 @@ GitHub Actions builds daily and on push to `main`, publishing to
 - **greetd + tuigreet** login on vt1 (`system_files/etc/greetd/config.toml`) —
   base-main has no display manager or fallback session
 - **Ptyxis** terminal, **cliphist**/**wl-clipboard**, **zsh**
+- Capture: **grim**/**slurp**/**swappy** (region → annotate) and **zbar**
+  (on-screen QR decode); **ddcutil** for external-monitor brightness via DMS
+- `system-update` — bootc + Flatpak + brew updates in one command
 - Fonts: CaskaydiaCove Nerd Font (`cascadia-code-nf-fonts`), Inter
   (`rsms-inter-fonts`)
 
