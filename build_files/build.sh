@@ -5,23 +5,33 @@ set -ouex pipefail
 # Copy the contents of system_files/ of the git repo to /
 cp -avf "/ctx/system_files"/. /
 
-### Install packages
+### niri desktop stack — everything from Fedora repos
+# base-main ships no desktop environment: niri is the only session, greetd +
+# tuigreet is the login path, Ptyxis the terminal. xwayland-satellite is
+# auto-spawned by niri for X11 clients.
+dnf5 install -y \
+    niri \
+    xwayland-satellite \
+    greetd \
+    tuigreet \
+    ptyxis \
+    cliphist \
+    wl-clipboard \
+    matugen \
+    cascadia-code-nf-fonts \
+    rsms-inter-fonts \
+    zsh
 
-# Packages can be installed from any enabled yum repo on the image.
-# RPMfusion repos are available by default in ublue main images
-# List of rpmfusion packages can be found here:
-# https://mirrors.rpmfusion.org/mirrorlist?path=free/fedora/updates/43/x86_64/repoview/index.html&protocol=https&redirect=1
+### DankMaterialShell — quickshell-based desktop shell (bar, launcher, lock,
+### notifications). COPRs enabled for the build only, disabled in the image
+### so machines don't track them outside image rebuilds.
+dnf5 -y copr enable avengemedia/dms
+dnf5 -y copr enable errornointernet/quickshell
+dnf5 -y install dms quickshell
+dnf5 -y copr disable avengemedia/dms
+dnf5 -y copr disable errornointernet/quickshell
 
-# this installs a package from fedora repos
-dnf5 install -y tmux
-
-# Use a COPR Example:
-#
-# dnf5 -y copr enable ublue-os/staging
-# dnf5 -y install package
-# Disable COPRs so they don't end up enabled on the final image:
-# dnf5 -y copr disable ublue-os/staging
-
-#### Example for enabling a System Unit File
-
+### Services
+# greetd config in system_files/etc/greetd/config.toml starts tuigreet on vt1.
+systemctl enable greetd.service
 systemctl enable podman.socket
