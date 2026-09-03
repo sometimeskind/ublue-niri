@@ -3,8 +3,8 @@ FROM scratch AS ctx
 COPY build_files /
 COPY system_files /system_files
 
-# Base Image
-FROM ghcr.io/ublue-os/bazzite:stable@sha256:b923f92d5a5b59eb992e269383eba2744601052da9d3d1595f76e79aa6ce2df0
+# Base Image — Universal Blue base-main (DE-less; niri is the only session)
+FROM ghcr.io/ublue-os/base-main:latest@sha256:79773ec589231a4101f252ba7a2d103caffcf284e483aa49880f3d640e82bf6d
 ## Other possible base images include:
 # FROM ghcr.io/ublue-os/bazzite:testing
 # FROM ghcr.io/ublue-os/aurora:stable

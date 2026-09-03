@@ -1,0 +1,8 @@
+# greetd — login manager for the niri-only image (no DE fallback).
+# tuigreet's --cmd launches the niri session script shipped by the niri rpm.
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --cmd niri-session"
+user = "greetd"
