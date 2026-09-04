@@ -42,6 +42,21 @@ dnf5 -y install dms quickshell
 dnf5 -y copr disable avengemedia/dms
 dnf5 -y copr disable errornointernet/quickshell
 
+### VS Code — Microsoft repo RPM, baked in so devcontainers (podman) and
+### terminal tooling run unsandboxed; extensions come from the dotfiles
+### Brewfile. Repo disabled in the image: updates ride image rebuilds.
+rpm --import https://packages.microsoft.com/keys/microsoft.asc
+cat >/etc/yum.repos.d/vscode.repo <<'REPO'
+[code]
+name=Visual Studio Code
+baseurl=https://packages.microsoft.com/yumrepos/vscode
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+REPO
+dnf5 install -y code
+dnf5 config-manager setopt code.enabled=0
+
 ### Services
 # greetd config in system_files/etc/greetd/config.toml starts tuigreet on vt1.
 systemctl enable greetd.service
