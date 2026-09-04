@@ -21,6 +21,7 @@ GitHub Actions builds daily and on push to `main`, publishing to
 - Capture: **grim**/**slurp**/**swappy** (region → annotate) and **zbar**
   (on-screen QR decode); **ddcutil** for external-monitor brightness via DMS
 - `system-update` — bootc + Flatpak + brew updates in one command
+- **make**/**stow** so the dotfiles bootstrap works before brew is installed
 - Fonts: CaskaydiaCove Nerd Font (`cascadia-code-nf-fonts`), Inter
   (`rsms-inter-fonts`)
 
