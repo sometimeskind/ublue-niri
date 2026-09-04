@@ -325,6 +325,8 @@ _build-bib $target_image $tag $type $config: (_rootful_load_image target_image t
       "${target_image}:${tag}"
 
     mkdir -p output
+    # mv cannot overwrite a non-empty dir from a previous build of this type
+    sudo rm -rf output/"${type}" output/bootiso
     sudo mv -f $BUILDTMP/* output/
     sudo rmdir $BUILDTMP
     sudo chown -R $USER:$USER output/
