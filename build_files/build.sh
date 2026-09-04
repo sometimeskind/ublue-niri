@@ -46,3 +46,7 @@ dnf5 -y copr disable errornointernet/quickshell
 # greetd config in system_files/etc/greetd/config.toml starts tuigreet on vt1.
 systemctl enable greetd.service
 systemctl enable podman.socket
+# DMS runs as a systemd user service (unit shipped by the dms rpm):
+# restart-on-crash + journal logs. niri-session activates
+# graphical-session.target, which pulls it in.
+systemctl --global enable dms.service
