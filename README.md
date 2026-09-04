@@ -22,6 +22,9 @@ GitHub Actions builds daily and on push to `main`, publishing to
   (on-screen QR decode); **ddcutil** for external-monitor brightness via DMS
 - `system-update` — bootc + Flatpak + brew updates in one command
 - **make**/**stow** so the dotfiles bootstrap works before brew is installed
+- A DMS CLI policy (`/usr/share/dms/cli-policy.json`) re-enabling `dms setup`
+  on this ostree image — upstream blocks it wholesale on immutable systems;
+  only the greeter subcommands stay blocked (greetd is baked in)
 - Fonts: CaskaydiaCove Nerd Font (`cascadia-code-nf-fonts`), Inter
   (`rsms-inter-fonts`)
 
