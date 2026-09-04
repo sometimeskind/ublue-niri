@@ -29,6 +29,10 @@ dnf5 install -y \
     rsms-inter-fonts \
     zsh
 
+### Bootstrap tools — the dotfiles flow is `git clone` + `make stow` before
+### brew exists, so make and stow must come from the image.
+dnf5 install -y make stow
+
 ### DankMaterialShell — quickshell-based desktop shell (bar, launcher, lock,
 ### notifications). COPRs enabled for the build only, disabled in the image
 ### so machines don't track them outside image rebuilds.
