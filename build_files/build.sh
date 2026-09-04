@@ -33,6 +33,13 @@ dnf5 install -y \
 ### brew exists, so make and stow must come from the image.
 dnf5 install -y make stow
 
+### DMS first-run system check extras: tuned-ppd provides the
+### power-profiles D-Bus API (battery/performance switching in the shell),
+### cups-pk-helper lets the GUI manage printers (cups is already in the
+### base), kf6-kimageformats gives Qt/quickshell extra wallpaper formats.
+dnf5 install -y tuned-ppd cups-pk-helper kf6-kimageformats
+systemctl enable tuned.service tuned-ppd.service
+
 ### DankMaterialShell — quickshell-based desktop shell (bar, launcher, lock,
 ### notifications). COPRs enabled for the build only, disabled in the image
 ### so machines don't track them outside image rebuilds.
