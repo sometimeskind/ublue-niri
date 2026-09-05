@@ -1,0 +1,8 @@
+# Hardened moshi-hook defaults, read when the daemon first starts (so they
+# must exist before any per-user setup runs). Background discovery, rate-limit
+# telemetry and loopback port probing off; prompt/response prefixes and
+# approval command text still reach Moshi's servers — that cannot be disabled.
+[gateway]
+always_on_discovery = false
+usage_collection = false
+scan_ports = []

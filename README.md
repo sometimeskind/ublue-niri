@@ -47,6 +47,26 @@ sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/sometimeskind/ublue-ni
 Then follow the dotfiles README ("Fedora Atomic laptop" section) for the home
 directory: flathub remote + Zen flatpak, brew, stow, `dms setup`.
 
+### Moshi (phone) access
+
+`mosh` (client + server) and `moshi-hook`/`moshi` are baked into the image —
+mosh as an RPM so inbound sessions find `/usr/bin/mosh-server` on the default
+SSH-exec PATH, moshi-hook fetched checksum-verified from the vendor CDN at
+image build (the daily rebuild tracks releases; `moshi-hook update` doesn't
+apply on immutable `/usr`). The hardened `~/.config/moshi/config.toml`
+(discovery/telemetry off) is pre-seeded via `/etc/skel` for users created on
+this image; a pre-existing user (rebase case) must copy it from
+`/etc/skel/.config/moshi/config.toml` **before** first running the daemon.
+Then, per user:
+
+```bash
+moshi-hook pair --token <token from Moshi app: Settings -> Hooks>
+moshi-hook install          # writes agent hook configs
+moshi-hook service install  # user systemd unit for the daemon
+moshi-hook host setup       # Easy Pair SSH/Mosh access (enables sshd as needed;
+                            # reachability from the phone is via Tailscale)
+```
+
 ## Working on this repo
 
 - `just build ublue-niri latest` — local container build (needs podman)
