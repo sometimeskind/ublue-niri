@@ -52,6 +52,28 @@ rm -f /tmp/moshi-hook.tgz /tmp/moshi-hook
 ### brew exists, so make and stow must come from the image.
 dnf5 install -y make stow
 
+### Disaster-recovery tooling — homelab's scripts/op-vault-export.sh (and the
+### restore path in its docs/1password-recovery.md) must work on a fresh
+### machine BEFORE brew/dotfiles exist — that is exactly the scenario the
+### export exists for — so its dependencies are baked rather than left to the
+### Brewfile. age + jq come from Fedora; the op CLI from 1Password's RPM repo,
+### disabled after the build like the vscode repo below (updates ride image
+### rebuilds). kubectl stays in the Brewfile: the script's cluster-marker
+### refresh degrades to a warning without it.
+dnf5 install -y age jq
+rpm --import https://downloads.1password.com/linux/keys/1password.asc
+cat >/etc/yum.repos.d/1password.repo <<'REPO'
+[1password]
+name=1Password Stable Channel
+baseurl=https://downloads.1password.com/linux/rpm/stable/$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://downloads.1password.com/linux/keys/1password.asc
+REPO
+dnf5 install -y 1password-cli
+dnf5 config-manager setopt 1password.enabled=0
+
 ### DMS first-run system check extras: tuned-ppd provides the
 ### power-profiles D-Bus API (battery/performance switching in the shell),
 ### cups-pk-helper lets the GUI manage printers (cups is already in the
