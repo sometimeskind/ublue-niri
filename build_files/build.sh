@@ -52,6 +52,14 @@ rm -f /tmp/moshi-hook.tgz /tmp/moshi-hook
 ### brew exists, so make and stow must come from the image.
 dnf5 install -y make stow
 
+### Homebrew prerequisites — Homebrew on Linux needs a system C toolchain
+### (docs.brew.sh/Homebrew-on-Linux#requirements) even when everything is
+### bottled: the gcc formula's post-install shells out to /usr/bin/cc to find
+### glibc's crt*.o, and tap formulae without bottles (hashicorp/tap terraform,
+### siderolabs/tap talosctl — plain binary downloads) refuse to install
+### without one ("No developer tools installed").
+dnf5 install -y gcc gcc-c++ glibc-devel
+
 ### Disaster-recovery tooling — homelab's scripts/op-vault-export.sh (and the
 ### restore path in its docs/1password-recovery.md) must work on a fresh
 ### machine BEFORE brew/dotfiles exist — that is exactly the scenario the
