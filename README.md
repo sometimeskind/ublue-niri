@@ -25,6 +25,9 @@ GitHub Actions builds daily and on push to `main`, publishing to
 - **gcc**/**gcc-c++**/**glibc-devel** — Homebrew on Linux needs a system C
   toolchain even for bottled formulae (its gcc post-install shells out to
   `/usr/bin/cc`; tap formulae without bottles refuse to install without one)
+- NVIDIA's **GeForce NOW** Flatpak remote, preconfigured via
+  `/etc/flatpak/remotes.d/GeForceNOW.flatpakrepo` — the dotfiles Brewfile
+  installs `com.nvidia.geforcenow` from it
 - **VS Code** (Microsoft repo RPM, repo disabled after install — updates come
   with image rebuilds; extensions via the dotfiles Brewfile)
 - A DMS CLI policy (`/usr/share/dms/cli-policy.json`) re-enabling `dms setup`
