@@ -52,6 +52,73 @@ rm -f /tmp/moshi-hook.tgz /tmp/moshi-hook
 ### brew exists, so make and stow must come from the image.
 dnf5 install -y make stow
 
+### Disaster-recovery tooling — homelab's scripts/op-vault-export.sh (and the
+### restore path in its docs/1password-recovery.md) must work on a fresh
+### machine BEFORE brew/dotfiles exist — that is exactly the scenario the
+### export exists for — so its dependencies are baked rather than left to the
+### Brewfile. age + jq come from Fedora; 1Password below. kubectl stays in
+### the Brewfile: the script's cluster-marker refresh degrades to a warning
+### without it.
+dnf5 install -y age jq
+
+### 1Password desktop + op CLI — RPMs from 1Password's repo, disabled after
+### the build like the vscode repo below (updates ride image rebuilds). The
+### desktop RPM needs the known ostree dance (recipe: rsturla/eternal-images,
+### briorg/bluefin lineage):
+###  - it installs into /opt/1Password, but /opt is a symlink to machine-local
+###    /var/opt which is not shipped — relocate to /usr/lib/1Password and
+###    recreate /opt/1Password as a boot-time tmpfiles.d symlink;
+###  - its %post creates groups, but /etc/group is 3-way merged on deploy and
+###    any real system has local edits, so image-built entries never land —
+###    fixed-GID sysusers.d entries own the groups instead (created before the
+###    install so the %post groupadds are no-ops at the same GIDs).
+rpm --import https://downloads.1password.com/linux/keys/1password.asc
+cat >/etc/yum.repos.d/1password.repo <<'REPO'
+[1password]
+name=1Password Stable Channel
+baseurl=https://downloads.1password.com/linux/rpm/stable/$basearch
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://downloads.1password.com/linux/keys/1password.asc
+REPO
+
+# Fixed GIDs: must be >1000 and never collide with real groups; normal user
+# group GIDs are sequential from 1000, so park these well above.
+GID_ONEPASSWORD=1790
+GID_ONEPASSWORDCLI=1791
+GID_ONEPASSWORDMCP=1792
+cat >/usr/lib/sysusers.d/onepassword.conf <<EOF
+g onepassword ${GID_ONEPASSWORD}
+g onepassword-cli ${GID_ONEPASSWORDCLI}
+g onepassword-mcp ${GID_ONEPASSWORDMCP}
+EOF
+systemd-sysusers /usr/lib/sysusers.d/onepassword.conf
+
+# The %post also runs `mkdir -p /usr/local/bin` for its 1password-mcp symlink;
+# during the build /usr/local dangles into /var, which makes mkdir -p (and so
+# the whole dnf transaction) fail. Pre-create the target; the symlink it drops
+# there is machine-local /var content that is not shipped either way.
+mkdir -p "$(readlink -f /usr/local)/bin"
+mkdir -p /var/opt
+dnf5 install -y 1password 1password-cli
+dnf5 config-manager setopt 1password.enabled=0
+
+# Relocate out of unshipped /var/opt; /opt/1Password reappears at boot.
+mv /var/opt/1Password /usr/lib/1Password
+rm -f /usr/bin/1password
+ln -s /opt/1Password/1password /usr/bin/1password
+cat >/usr/lib/tmpfiles.d/onepassword.conf <<'EOF'
+L  /opt/1Password  -  -  -  -  /usr/lib/1Password
+EOF
+
+# after-install.sh equivalent: setgid hardening on the helper binaries (no
+# extra privileges — protects them from environmental tampering).
+chgrp "${GID_ONEPASSWORD}" /usr/lib/1Password/1Password-BrowserSupport
+chmod g+s /usr/lib/1Password/1Password-BrowserSupport
+chgrp "${GID_ONEPASSWORDCLI}" /usr/bin/op
+chmod g+s /usr/bin/op
+
 ### DMS first-run system check extras: tuned-ppd provides the
 ### power-profiles D-Bus API (battery/performance switching in the shell),
 ### cups-pk-helper lets the GUI manage printers (cups is already in the
