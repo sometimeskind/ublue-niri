@@ -15,7 +15,8 @@ GitHub Actions builds daily and on push to `main`, publishing to
 - **niri** (Fedora repos) with **xwayland-satellite** for X11 clients
 - **DankMaterialShell** + **quickshell** (COPRs `avengemedia/dms`,
   `errornointernet/quickshell` — enabled at build time only) and **matugen**
-- **greetd + tuigreet** login on vt1 (`system_files/etc/greetd/config.toml`) —
+- **greetd + tuigreet** login on vt1 (`system_files/etc/greetd/config.toml`),
+  auto-logging `tom` into niri on boot (DMS locks the session at startup) —
   base-main has no display manager or fallback session
 - **Ptyxis** terminal, **cliphist**/**wl-clipboard**, **zsh**
 - Capture: **grim**/**slurp**/**swappy** (region → annotate) and **zbar**
