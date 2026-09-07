@@ -48,6 +48,23 @@ install -m 755 /tmp/moshi-hook /usr/bin/moshi-hook
 ln -sf moshi-hook /usr/bin/moshi
 rm -f /tmp/moshi-hook.tgz /tmp/moshi-hook
 
+### Tailscale — RPM from the vendor repo (disabled after the build like the
+### others: updates ride image rebuilds). tailscaled is enabled system-wide;
+### node state lives in /var/lib/tailscale and survives image updates, so a
+### machine only ever logs in once. That login is automated too:
+### tailscale-autoconnect (system_files/usr/bin) runs from a user timer, and
+### when tailscaled reports NeedsLogin it reads an auth key from 1Password
+### and does `tailscale up` via a sudoers rule limited to that one command.
+### Everything a phone reaches (Moshi/mosh) rides Tailscale — see README.
+rpm --import https://pkgs.tailscale.com/stable/fedora/repo.gpg
+curl -fsSL https://pkgs.tailscale.com/stable/fedora/tailscale.repo -o /etc/yum.repos.d/tailscale.repo
+dnf5 install -y tailscale
+dnf5 config-manager setopt tailscale-stable.enabled=0
+systemctl enable tailscaled.service
+chmod 0440 /etc/sudoers.d/tailscale-autoconnect
+visudo -cf /etc/sudoers.d/tailscale-autoconnect
+systemctl --global enable tailscale-autoconnect.timer
+
 ### Bootstrap tools — the dotfiles flow is `git clone` + `make stow` before
 ### brew exists, so make and stow must come from the image.
 dnf5 install -y make stow

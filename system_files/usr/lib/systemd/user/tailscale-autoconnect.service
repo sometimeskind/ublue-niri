@@ -1,0 +1,8 @@
+[Unit]
+Description=Join the tailnet when tailscaled needs a login
+# Only once the 1Password CLI has been used on this account.
+ConditionPathExists=%h/.config/op/config
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/tailscale-autoconnect

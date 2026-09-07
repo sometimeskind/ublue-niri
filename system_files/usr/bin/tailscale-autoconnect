@@ -1,0 +1,33 @@
+#!/bin/bash
+# Keep this machine joined to the tailnet without a manual `tailscale up`.
+#
+# Runs in two phases from one file so sudoers can allow exactly one command:
+#  - as the user (systemd user timer): exit when tailscaled is already Running
+#    or was deliberately stopped with `tailscale down`; when it NeedsLogin,
+#    read the auth key from 1Password and hand it to the root phase on stdin;
+#  - as root (via `sudo -n`, no arguments): write the key to a root-only tmpfs
+#    file and `tailscale up` from it, so the key never appears in argv, and
+#    make the invoking user the tailscaled operator so plain `tailscale`
+#    commands work without sudo afterwards.
+set -euo pipefail
+
+OP_REF='op://Personal/Tailscale/auth key'
+
+state="$(tailscale status --json 2>/dev/null | jq -r .BackendState || echo unknown)"
+case "$state" in
+  Running) exit 0 ;;
+  Stopped) echo "tailscale is down on purpose; not reconnecting" >&2; exit 0 ;;
+esac
+
+if [ "$EUID" -ne 0 ]; then
+  /usr/bin/op read "$OP_REF" </dev/null | exec sudo -n /usr/bin/tailscale-autoconnect
+fi
+
+keyfile="$(mktemp -p /run tailscale-authkey.XXXXXX)"
+trap 'rm -f "$keyfile"' EXIT
+tr -d '[:space:]' >"$keyfile"
+[ -s "$keyfile" ] || { echo "no auth key on stdin" >&2; exit 1; }
+
+operator=()
+[ -n "${SUDO_USER:-}" ] && operator=(--operator="$SUDO_USER")
+tailscale up --auth-key="file:$keyfile" "${operator[@]}"

@@ -77,6 +77,35 @@ moshi-hook host setup       # Easy Pair SSH/Mosh access (enables sshd as needed;
                             # reachability from the phone is via Tailscale)
 ```
 
+### Tailscale
+
+`tailscale` is baked in and `tailscaled` enabled. The node login is
+automated: the user timer `tailscale-autoconnect.timer` (globally enabled,
+fires 2 min after login and every 15 min) runs `/usr/bin/tailscale-autoconnect`,
+which does nothing while tailscaled is `Running` or was stopped on purpose with
+`tailscale down`. When tailscaled reports `NeedsLogin` (fresh machine, expired
+node key) it reads the auth key from 1Password (`op://Personal/Tailscale/auth key`,
+so the 1Password CLI must already work for the user: `~/.config/op/config`
+exists) and re-executes itself through `sudo -n` — allowed without a password
+for `wheel` by `/etc/sudoers.d/tailscale-autoconnect`, for that one command
+with no arguments — to run `tailscale up --auth-key=file:<root-only tmpfs
+file> --operator=<user>`. The operator flag makes later plain `tailscale`
+commands work without sudo. Node state persists in `/var/lib/tailscale`
+across image updates, so in practice the key is used once per machine.
+
+One-time tailnet-side setup: create a **reusable, pre-approved** auth key in
+the Tailscale admin console (Settings -> Keys; the max 90-day key expiry only
+limits how long the key can enrol new machines, joined nodes are unaffected)
+and store it as the `auth key` field of the `Tailscale` login item in the
+1Password `Personal` vault. Consider disabling key expiry for the node in the
+admin console so the timer never has to re-enrol it. Right after a rebase you
+can trigger it by hand instead of waiting:
+
+```bash
+systemctl --user start tailscale-autoconnect.service
+tailscale status
+```
+
 ## Working on this repo
 
 - `just build ublue-niri latest` — local container build (needs podman)
