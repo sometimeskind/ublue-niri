@@ -61,6 +61,7 @@ curl -fsSL https://pkgs.tailscale.com/stable/fedora/tailscale.repo -o /etc/yum.r
 dnf5 install -y tailscale
 dnf5 config-manager setopt tailscale-stable.enabled=0
 systemctl enable tailscaled.service
+chmod 0755 /usr/bin/tailscale-autoconnect
 chmod 0440 /etc/sudoers.d/tailscale-autoconnect
 visudo -cf /etc/sudoers.d/tailscale-autoconnect
 systemctl --global enable tailscale-autoconnect.timer
