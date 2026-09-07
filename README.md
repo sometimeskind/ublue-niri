@@ -19,6 +19,10 @@ GitHub Actions builds daily and on push to `main`, publishing to
   auto-logging `tom` into niri on boot (DMS locks the session at startup) —
   base-main has no display manager or fallback session
 - **Ptyxis** terminal, **cliphist**/**wl-clipboard**, **zsh**
+- **Nautilus** file manager (+ **gvfs-mtp**) — the one GUI app baked as an
+  RPM: not on Flathub, and it needs host gvfs for trash/mounts/phones. The
+  other GNOME core apps (Loupe, Papers, Showtime, Decibels) are Flatpaks from
+  the dotfiles Brewfile
 - Capture: **grim**/**slurp**/**swappy** (region → annotate) and **zbar**
   (on-screen QR decode); **ddcutil** for external-monitor brightness via DMS
 - `system-update` — bootc + Flatpak + brew updates in one command
