@@ -151,6 +151,23 @@ chmod g+s /usr/lib/1Password/1Password-BrowserSupport
 chgrp "${GID_ONEPASSWORDCLI}" /usr/bin/op
 chmod g+s /usr/bin/op
 
+### YubiKey support for the vault-export DR chain (homelab#1549): ykman for
+### key management, age-plugin-yubikey so either YubiKey can decrypt the
+### export on a fresh machine. Both talk CCID via PC/SC — pcsc-lite ships in
+### the base but the socket is not enabled, so enable it here. There is no
+### Fedora package for age-plugin-yubikey: hash-pinned upstream release
+### binary (moshi-hook pattern). v0.5.1 published no Linux asset — bump past
+### v0.5.0 when upstream ships one again.
+dnf5 install -y yubikey-manager pcsc-lite pcsc-lite-ccid
+APY_VERSION=v0.5.0
+APY_SHA256=019b35a13fc81be56d73d0723db0a2082fbd04c936c2c6836381111f7f51b2c3
+curl -fsSL "https://github.com/str4d/age-plugin-yubikey/releases/download/${APY_VERSION}/age-plugin-yubikey-${APY_VERSION}-x86_64-linux.tar.gz" -o /tmp/apy.tgz
+echo "${APY_SHA256}  /tmp/apy.tgz" | sha256sum -c -
+tar -xzf /tmp/apy.tgz -C /tmp age-plugin-yubikey/age-plugin-yubikey
+install -m 755 /tmp/age-plugin-yubikey/age-plugin-yubikey /usr/bin/age-plugin-yubikey
+rm -rf /tmp/apy.tgz /tmp/age-plugin-yubikey
+systemctl enable pcscd.socket
+
 ### DMS first-run system check extras: tuned-ppd provides the
 ### power-profiles D-Bus API (battery/performance switching in the shell),
 ### cups-pk-helper lets the GUI manage printers (cups is already in the
