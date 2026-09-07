@@ -11,12 +11,18 @@ cp -avf "/ctx/system_files"/. /
 # auto-spawned by niri for X11 clients. grim/slurp/swappy/zbar back the
 # capture keybinds in dotfiles; ddcutil gives DMS external-monitor
 # brightness over DDC/CI (i2c-dev loaded via /etc/modules-load.d).
+# Nautilus is the one GUI app baked as an RPM: it is not on Flathub and needs
+# host gvfs (trash, mounts; gvfs-mtp for phones) rather than a sandbox. The
+# other GNOME core apps (Loupe, Papers, Showtime, Decibels) are Flatpaks from
+# the dotfiles Brewfile.
 dnf5 install -y \
     niri \
     xwayland-satellite \
     greetd \
     tuigreet \
     ptyxis \
+    nautilus \
+    gvfs-mtp \
     cliphist \
     wl-clipboard \
     grim \
