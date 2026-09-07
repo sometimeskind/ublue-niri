@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Override of /usr/lib/firewalld/zones/public.xml (the default zone, holding
+  the wifi interface). Same as upstream plus the mosh service: inbound mosh
+  needs UDP 60000-61000 or the session hangs right after the SSH handshake.
+  Shipped in /etc so it lands via bootc's 3-way merge on machines that have
+  not locally edited the zone; a machine-local permanent firewall-cmd edit
+  would shadow this file.
+-->
+<zone>
+  <short>Public</short>
+  <description>For use in public areas. You do not trust the other computers on networks to not harm your computer. Only selected incoming connections are accepted.</description>
+  <service name="ssh"/>
+  <service name="mosh"/>
+  <service name="mdns"/>
+  <service name="dhcpv6-client"/>
+  <forward/>
+</zone>

@@ -63,6 +63,10 @@ apply on immutable `/usr`). The hardened `~/.config/moshi/config.toml`
 (discovery/telemetry off) is pre-seeded via `/etc/skel` for users created on
 this image; a pre-existing user (rebase case) must copy it from
 `/etc/skel/.config/moshi/config.toml` **before** first running the daemon.
+The firewalld `public` zone (`system_files/etc/firewalld/zones/public.xml`)
+adds the `mosh` service (UDP 60000-61000) next to `ssh`; a machine that has
+already edited the zone with `firewall-cmd --permanent` keeps its own copy
+and must add the service itself.
 Then, per user:
 
 ```bash
