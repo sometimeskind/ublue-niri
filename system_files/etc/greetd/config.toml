@@ -3,6 +3,14 @@
 [terminal]
 vt = 1
 
+# Single-user laptop: auto-login straight into niri on the first greetd run
+# after boot. DMS then locks the session immediately (lockAtStartup in the
+# dotfiles dms package), so the lock screen replaces the greeter. Logging out
+# falls back to tuigreet below.
+[initial_session]
+command = "niri-session"
+user = "tom"
+
 [default_session]
 command = "tuigreet --time --remember --cmd niri-session"
 user = "greetd"
