@@ -1,0 +1,3 @@
+# The user phase of tailscale-autoconnect re-executes itself as root to run
+# `tailscale up`; the trailing "" forbids any arguments.
+%wheel ALL=(root) NOPASSWD: /usr/bin/tailscale-autoconnect ""
