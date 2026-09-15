@@ -6,6 +6,15 @@ sudo bootc upgrade
 flatpak update -y
 if command -v brew &>/dev/null; then
     brew upgrade
+    # `brew upgrade` only touches what is already installed, so a package newly
+    # added to the dotfiles Brewfile would never land here (homelab#1635).
+    # --no-upgrade keeps this to installing what is missing; upgrading is the
+    # line above. Not fatal: a leftover fedora-remote Flatpak blocks its Flathub
+    # copy (the fix is in the dotfiles README) and must not abort the run.
+    if [[ -f "$HOME/src/dotfiles/Brewfile" ]]; then
+        brew bundle install --no-upgrade --file "$HOME/src/dotfiles/Brewfile" \
+            || echo "brew bundle reported failures (above) — continuing"
+    fi
 fi
 
 echo "system-update done. If bootc staged a new image, reboot to activate it."

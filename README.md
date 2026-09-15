@@ -25,7 +25,10 @@ GitHub Actions builds daily and on push to `main`, publishing to
   the dotfiles Brewfile
 - Capture: **grim**/**slurp**/**swappy** (region → annotate) and **zbar**
   (on-screen QR decode); **ddcutil** for external-monitor brightness via DMS
-- `system-update` — bootc + Flatpak + brew updates in one command
+- `system-update` — bootc + Flatpak + brew updates in one command, plus a
+  `brew bundle install --no-upgrade` pass so a package newly added to the
+  dotfiles Brewfile is installed rather than waiting for the next manual
+  `brew bundle`
 - **make**/**stow** so the dotfiles bootstrap works before brew is installed
 - **gcc**/**gcc-c++**/**glibc-devel** — Homebrew on Linux needs a system C
   toolchain even for bottled formulae (its gcc post-install shells out to
