@@ -5,5 +5,5 @@
     "greeter enable",
     "greeter uninstall"
   ],
-  "message": "greetd + tuigreet are baked into the ublue-niri image (system_files/etc/greetd); greeter changes happen via image rebuilds. User-level `dms setup` config deploys are allowed."
+  "message": "greetd + dms-greeter are baked into the ublue-niri image (system_files/etc/greetd); greeter changes happen via image rebuilds. User-level `dms setup` config deploys are allowed, as is `dms-greeter sync`."
 }

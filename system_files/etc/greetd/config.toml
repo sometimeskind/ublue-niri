@@ -1,16 +1,25 @@
 # greetd — login manager for the niri-only image (no DE fallback).
-# tuigreet's --cmd launches the niri session script shipped by the niri rpm.
 [terminal]
 vt = 1
 
 # Single-user laptop: auto-login straight into niri on the first greetd run
 # after boot. DMS then locks the session immediately (lockAtStartup in the
 # dotfiles dms package), so the lock screen replaces the greeter. Logging out
-# falls back to tuigreet below.
+# falls back to the greeter below.
 [initial_session]
 command = "niri-session"
 user = "tom"
 
+# dms-greeter renders the DankMaterialShell lock-screen UI as the login
+# screen and generates the niri config for its own session on the fly, so
+# there is nothing to configure beyond --command. It also sets up the seat,
+# D-Bus and runtime dirs itself, which is what tuigreet's --cmd niri-session
+# left to the session script. Run `dms-greeter sync` once as your user (and
+# after theme changes) to push the DMS theme and wallpaper into the greeter
+# cache; the greeter only reads the synced copy.
+#
+# tuigreet stays on the image: swapping this command back is the whole
+# rollback, and auto-login above means a broken greeter is not a lockout.
 [default_session]
-command = "tuigreet --time --remember --cmd niri-session"
-user = "greetd"
+command = "/usr/bin/dms-greeter --command niri"
+user = "greeter"

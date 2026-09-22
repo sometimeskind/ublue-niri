@@ -15,16 +15,29 @@ GitHub Actions builds daily and on push to `main`, publishing to
 - **niri** (Fedora repos) with **xwayland-satellite** for X11 clients
 - **DankMaterialShell** + **quickshell** (COPRs `avengemedia/dms`,
   `errornointernet/quickshell` — enabled at build time only) and **matugen**
-- **greetd + tuigreet** login on vt1 (`system_files/etc/greetd/config.toml`),
+- **greetd + dms-greeter** login on vt1 (`system_files/etc/greetd/config.toml`),
   auto-logging `tom` into niri on boot (DMS locks the session at startup) —
-  base-main has no display manager or fallback session
+  base-main has no display manager or fallback session. dms-greeter renders
+  the DMS lock-screen UI as the login screen and generates its own niri
+  config; `tuigreet` stays installed so swapping `default_session.command`
+  back is the entire rollback
 - **Ptyxis** terminal, **cliphist**/**wl-clipboard**, **zsh**
 - **Nautilus** file manager (+ **gvfs-mtp**) — the one GUI app baked as an
   RPM: not on Flathub, and it needs host gvfs for trash/mounts/phones. The
   other GNOME core apps (Loupe, Papers, Showtime, Decibels) are Flatpaks from
   the dotfiles Brewfile
-- Capture: **grim**/**slurp**/**swappy** (region → annotate) and **zbar**
-  (on-screen QR decode); **ddcutil** for external-monitor brightness via DMS
+- Capture: **grim**/**slurp**/**swappy** (region → annotate), **zbar**
+  (on-screen QR decode) and **tesseract** (region → OCR → clipboard);
+  **ddcutil** for external-monitor brightness via DMS. DMS's own screenshot
+  action hands off to swappy via `DMS_SCREENSHOT_EDITOR` in
+  `system_files/usr/lib/systemd/user/dms.service.d/override.conf`
+- **danksearch** — the filesystem index behind file search in the DMS
+  launcher (`dsearch.service`, enabled per-user)
+- **udiskie** — removable-media automount as a user service; base-main has no
+  desktop environment, so nothing else mounts a USB stick unless Nautilus is
+  open
+- **xdg-terminal-exec** — routes any app's "open a terminal" to Ptyxis
+  (`/usr/share/xdg-terminal-exec/xdg-terminals.list`)
 - `system-update` — bootc + Flatpak + brew updates in one command, plus a
   `brew bundle install --no-upgrade` pass so a package newly added to the
   dotfiles Brewfile is installed rather than waiting for the next manual
@@ -60,6 +73,19 @@ sudo rpm-ostree rebase ostree-unverified-registry:ghcr.io/sometimeskind/ublue-ni
 
 Then follow the dotfiles README ("Fedora Atomic laptop" section) for the home
 directory: flathub remote + Zen flatpak, brew, stow, `dms setup`.
+
+### Login screen
+
+The greeter reads a synced copy of the DMS theme, not the live config, so run
+this once as your user and again after theme or wallpaper changes:
+
+```bash
+dms-greeter sync
+```
+
+Greeter options live in DMS under Settings → Greeter. The greeter user and
+`/var/cache/dms-greeter` come from the package's own `sysusers.d`/`tmpfiles.d`,
+so they are recreated at boot and need nothing from this repo.
 
 ### Moshi (phone) access
 
