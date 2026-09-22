@@ -38,6 +38,8 @@ GitHub Actions builds daily and on push to `main`, publishing to
   open
 - **xdg-terminal-exec** — routes any app's "open a terminal" to Ptyxis
   (`/usr/share/xdg-terminal-exec/xdg-terminals.list`)
+- `luks-tpm2-autounlock` — gum-driven toggle for TPM2 auto-unlock of the LUKS
+  root, bound to PCR 7+14 so image rebuilds don't invalidate it (see below)
 - `system-update` — bootc + Flatpak + brew updates in one command, plus a
   `brew bundle install --no-upgrade` pass so a package newly added to the
   dotfiles Brewfile is installed rather than waiting for the next manual
@@ -86,6 +88,22 @@ dms-greeter sync
 Greeter options live in DMS under Settings → Greeter. The greeter user and
 `/var/cache/dms-greeter` come from the package's own `sysusers.d`/`tmpfiles.d`,
 so they are recreated at boot and need nothing from this repo.
+
+### Disk unlock
+
+The root volume is LUKS. To stop typing the passphrase at every boot:
+
+```bash
+luks-tpm2-autounlock
+```
+
+It enrolls a TPM2 keyslot bound to PCR 7+14 (Secure Boot policy and shim/MOK
+state) rather than 4+11, which change on every kernel update and would break
+the unlock after each image rebuild. Say yes to the PIN prompt: PCR 7+14
+alone unlock the disk for anyone who powers the laptop on, which is a
+downgrade on a machine holding a 1Password session and a tailnet identity.
+The passphrase keyslot is never touched and stays as recovery; re-running the
+command and choosing Disable wipes the TPM2 slot again.
 
 ### Moshi (phone) access
 

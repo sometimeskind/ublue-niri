@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Toggle TPM2-backed auto-unlock for the LUKS root volume.
+# Adapted from zirconium-dev/zirconium (usr/bin/luks-tpm2-autounlock).
+#
+# Binds to PCR 7+14 (Secure Boot policy, shim/MOK state) rather than 4+11,
+# which change on every kernel update and would break the unlock after each
+# image rebuild. The passphrase keyslot is never touched: it stays the
+# recovery path, and --wipe-slot=tpm2 only clears earlier TPM2 enrollments.
+#
+# The PIN prompt defaults to yes on purpose. PCR 7+14 with no PIN means the
+# disk unlocks for anyone who powers the laptop on, which on a machine
+# carrying a 1Password session and a tailnet identity is worse than where we
+# started.
+set -euo pipefail
+
+RD_LUKS_UUID="$(xargs -n1 -a /proc/cmdline | grep -E 'rd\.luks\.(uuid|name)' | head -n1 | cut -d= -f2 | sed 's/^luks-//')"
+if [[ -z "${RD_LUKS_UUID}" ]]; then
+    echo "No rd.luks.* on the kernel cmdline: root is not LUKS-encrypted." >&2
+    exit 1
+fi
+CRYPT_DISK="$(realpath "/dev/disk/by-uuid/${RD_LUKS_UUID}")"
+
+# gum confirm returns 0 affirmative, 1 negative, 130 aborted. Esc must not
+# read as "disable", so the exit code is matched rather than tested with !.
+rc=0
+gum confirm --affirmative=Enable --negative=Disable "TPM2 auto-unlock for ${CRYPT_DISK}?" || rc=$?
+case "${rc}" in
+    0) ;;
+    1)
+        sudo systemd-cryptenroll --wipe-slot=tpm2 "${CRYPT_DISK}"
+        echo "TPM2 keyslots removed. The passphrase is the only unlock path again."
+        exit 0
+        ;;
+    *) exit 0 ;;
+esac
+
+pin_rc=0
+gum confirm --default=yes "Require a PIN at boot? (recommended)" || pin_rc=$?
+case "${pin_rc}" in
+    0) PIN_ARG=--tpm2-with-pin=yes ;;
+    1) PIN_ARG=--tpm2-with-pin=no ;;
+    *) exit 0 ;;
+esac
+
+sudo systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=7+14 "${PIN_ARG}" "${CRYPT_DISK}"
+echo "Enrolled. Active from the next boot; the passphrase still works as recovery."

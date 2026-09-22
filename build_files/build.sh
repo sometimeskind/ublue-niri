@@ -21,7 +21,8 @@ cp -avf "/ctx/system_files"/. /
 # removable media, which nothing else does here: base-main has no desktop
 # environment and udisks2 only mounts when Nautilus asks it to.
 # xdg-terminal-exec routes any app's "open a terminal" to Ptyxis via
-# /usr/share/xdg-terminal-exec/xdg-terminals.list.
+# /usr/share/xdg-terminal-exec/xdg-terminals.list. gum draws the prompts in
+# luks-tpm2-autounlock.
 dnf5 install -y \
     niri \
     xwayland-satellite \
@@ -40,6 +41,7 @@ dnf5 install -y \
     tesseract \
     udiskie \
     xdg-terminal-exec \
+    gum \
     matugen \
     cascadia-code-nf-fonts \
     rsms-inter-fonts \
@@ -229,6 +231,7 @@ dnf5 config-manager setopt code.enabled=0
 ### Services
 # greetd config in system_files/etc/greetd/config.toml starts dms-greeter on
 # vt1 (tuigreet stays installed as the one-line rollback).
+chmod 0755 /usr/bin/luks-tpm2-autounlock
 systemctl enable greetd.service
 systemctl enable podman.socket
 # DMS runs as a systemd user service (unit shipped by the dms rpm):
