@@ -15,6 +15,14 @@ cp -avf "/ctx/system_files"/. /
 # host gvfs (trash, mounts; gvfs-mtp for phones) rather than a sandbox. The
 # other GNOME core apps (Loupe, Papers, Showtime, Decibels) are Flatpaks from
 # the dotfiles Brewfile.
+# tesseract turns the same grim capture into text (the Mod+Shift+O OCR bind in
+# dotfiles, borrowed from zirconium's zocr but without its screenshot-IPC
+# polling loop, since grim writes to a pipe synchronously). udiskie automounts
+# removable media, which nothing else does here: base-main has no desktop
+# environment and udisks2 only mounts when Nautilus asks it to.
+# xdg-terminal-exec routes any app's "open a terminal" to Ptyxis via
+# /usr/share/xdg-terminal-exec/xdg-terminals.list. gum draws the prompts in
+# luks-tpm2-autounlock.
 dnf5 install -y \
     niri \
     xwayland-satellite \
@@ -30,6 +38,10 @@ dnf5 install -y \
     swappy \
     zbar \
     ddcutil \
+    tesseract \
+    udiskie \
+    xdg-terminal-exec \
+    gum \
     matugen \
     cascadia-code-nf-fonts \
     rsms-inter-fonts \
@@ -178,10 +190,27 @@ systemctl enable tuned.service tuned-ppd.service
 ### DankMaterialShell — quickshell-based desktop shell (bar, launcher, lock,
 ### notifications). COPRs enabled for the build only, disabled in the image
 ### so machines don't track them outside image rebuilds.
+#
+# avengemedia/danklinux was already being enabled implicitly: avengemedia/dms
+# declares it as a dependency repo, which is where the installed dgop and
+# quickshell actually came from. Naming it makes dms-greeter and danksearch
+# resolvable without relying on that.
+#
+# dms-greeter replaces tuigreet as the greetd session (see
+# system_files/etc/greetd/config.toml); it ships its own sysusers.d and
+# tmpfiles.d, so the greeter user and /var/cache/dms-greeter are created at
+# boot rather than needing the fixed-GID dance 1Password needed below.
+#
+# danksearch is the filesystem index behind the DMS launcher's file search.
+# Fedora also ships it, but at 0.1.2 with no systemd unit; the COPR's 1.6.0
+# ships /usr/lib/systemd/user/dsearch.service, and dnf resolves to the higher
+# version.
 dnf5 -y copr enable avengemedia/dms
+dnf5 -y copr enable avengemedia/danklinux
 dnf5 -y copr enable errornointernet/quickshell
-dnf5 -y install dms quickshell
+dnf5 -y install dms quickshell dms-greeter danksearch
 dnf5 -y copr disable avengemedia/dms
+dnf5 -y copr disable avengemedia/danklinux
 dnf5 -y copr disable errornointernet/quickshell
 
 ### VS Code — Microsoft repo RPM, baked in so devcontainers (podman) and
@@ -200,10 +229,17 @@ dnf5 install -y code
 dnf5 config-manager setopt code.enabled=0
 
 ### Services
-# greetd config in system_files/etc/greetd/config.toml starts tuigreet on vt1.
+# greetd config in system_files/etc/greetd/config.toml starts dms-greeter on
+# vt1 (tuigreet stays installed as the one-line rollback).
+chmod 0755 /usr/bin/luks-tpm2-autounlock
 systemctl enable greetd.service
 systemctl enable podman.socket
 # DMS runs as a systemd user service (unit shipped by the dms rpm):
 # restart-on-crash + journal logs. niri-session activates
 # graphical-session.target, which pulls it in.
 systemctl --global enable dms.service
+# dsearch indexes for the launcher's file search; udiskie automounts removable
+# media. Both are PartOf graphical-session.target, so niri-session pulls them
+# in and logout tears them down.
+systemctl --global enable dsearch.service
+systemctl --global enable udiskie.service

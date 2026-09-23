@@ -1,0 +1,15 @@
+[Unit]
+Description=udiskie removable-media automount
+# base-main has no desktop environment to do this: without udiskie a USB
+# stick only mounts when something (Nautilus) asks udisks2 to. PartOf, so it
+# stops with the session rather than lingering after logout.
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/udiskie --no-notify --no-tray
+Restart=on-failure
+RestartSec=1
+
+[Install]
+WantedBy=graphical-session.target
