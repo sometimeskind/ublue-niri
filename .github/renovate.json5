@@ -12,6 +12,13 @@
       "matchUpdateTypes": ["pin", "pinDigest"]
     },
     {
+      // Keep the Containerfile base image (ublue base-main) current: automerge
+      // its digest bumps so upstream OS updates flow into the daily build.
+      "automerge": true,
+      "matchUpdateTypes": ["digest"],
+      "matchFileNames": ["Containerfile"]
+    },
+    {
       "enabled": false,
       "matchUpdateTypes": ["digest", "pinDigest", "pin"],
       "matchDepTypes": ["container"],
