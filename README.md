@@ -123,11 +123,18 @@ Then, per user:
 
 ```bash
 moshi-hook pair --token <token from Moshi app: Settings -> Hooks>
-moshi-hook install          # writes agent hook configs
 moshi-hook service install  # user systemd unit for the daemon
 moshi-hook host setup       # Easy Pair SSH/Mosh access (enables sshd as needed;
                             # reachability from the phone is via Tailscale)
 ```
+
+Do **not** run `moshi-hook install`: the Claude Code hooks it would write already
+ship in the stowed dotfiles settings (portable `command -v` form, dotfiles#60),
+and it replaces the `~/.claude/settings.json` stow symlink with a plain file and
+drops foreign hooks. `moshi-hook doctor` and the Moshi app will still report
+"claude: hooks out of date" and suggest it; that is cosmetic (it compares
+command strings, not events). `system-update` warns when a release wants a hook
+the settings really lack (homelab#2094).
 
 ### Tailscale
 

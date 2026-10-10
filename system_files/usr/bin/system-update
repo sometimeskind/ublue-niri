@@ -17,4 +17,32 @@ if command -v brew &>/dev/null; then
     fi
 fi
 
+# moshi-hook arrives with the image, so there is nothing to upgrade here, but a
+# new release can want Claude Code hooks the dotfiles-stowed settings lack. Its
+# own `status`/`doctor` always call the stowed hooks out of date (they compare
+# command strings against the portable `command -v` guard, dotfiles#60) and
+# offer `moshi-hook install`, which replaces the stow symlink: never run it on
+# the real HOME. Instead install into a scratch HOME and compare event+matcher
+# pairs (homelab#2094). This checks the running binary, so a release that bootc
+# just staged is checked on the first run after the reboot.
+moshi_hook_check() {
+    local scratch missing pairs='.hooks // {} | to_entries[] | .key as $e | .value[]
+        | select(any(.hooks[]; .command | test("moshi-hook"))) | "\($e) \(.matcher // "*")"'
+    scratch=$(mktemp -d)
+    trap 'rm -rf "$scratch"' RETURN
+    HOME="$scratch" moshi-hook install --target claude </dev/null >/dev/null 2>&1 \
+        && [[ -f "$scratch/.claude/settings.json" ]] || return 1
+    missing=$(comm -23 <(jq -r "$pairs" "$scratch/.claude/settings.json" | sort -u) \
+                       <(jq -r "$pairs" "$HOME/.claude/settings.json" | sort -u)) || return 1
+    if [[ -n "$missing" ]]; then
+        echo "WARNING: moshi-hook wants hooks absent from Claude settings (event matcher):"
+        echo "$missing" | sed 's/^/  /'
+        echo "  Add them via a dotfiles PR (portable command -v guard form);"
+        echo "  do NOT run moshi-hook install — it breaks the stowed settings."
+    fi
+}
+if command -v moshi-hook &>/dev/null && [[ -f "$HOME/.claude/settings.json" ]]; then
+    moshi_hook_check || echo "WARNING: could not preview moshi-hook's wanted hooks in a scratch HOME; check by hand."
+fi
+
 echo "system-update done. If bootc staged a new image, reboot to activate it."
