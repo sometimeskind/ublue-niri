@@ -115,10 +115,27 @@ apply on immutable `/usr`). The hardened `~/.config/moshi/config.toml`
 (discovery/telemetry off) is pre-seeded via `/etc/skel` for users created on
 this image; a pre-existing user (rebase case) must copy it from
 `/etc/skel/.config/moshi/config.toml` **before** first running the daemon.
-The firewalld `public` zone (`system_files/etc/firewalld/zones/public.xml`)
-adds the `mosh` service (UDP 60000-61000) next to `ssh`; a machine that has
-already edited the zone with `firewall-cmd --permanent` keeps its own copy
-and must add the service itself.
+sshd and mosh-server are reachable **over the tailnet only** (homelab#2194):
+the `tailnet` firewalld zone (`system_files/etc/firewalld/zones/tailnet.xml`,
+bound to `tailscale0` and to the tailnet ranges `100.64.0.0/10` and
+`fd7a:115c:a1e0::/48`) allows `ssh` and `mosh` (UDP 60000-61000), and the
+`public` zone, which holds the wifi, allows neither. sshd is key-only
+(`/etc/ssh/sshd_config.d/10-key-only.conf`). Both zone files ship in `/etc`,
+so a machine that has edited a zone with `firewall-cmd --permanent` keeps its
+own copy: check with the commands below after an update.
+
+```bash
+firewall-cmd --get-active-zones           # tailnet: tailscale0 + the two sources
+firewall-cmd --zone=public --list-services # no ssh, no mosh
+sudo sshd -T | grep -E '^(passwordauthentication|kbdinteractiveauthentication) '
+```
+
+Take a firewall change like this one only while sitting at the machine, and
+check from the phone (Moshi over Tailscale) before walking away. If remote
+access broke, either reopen the wifi side until the next reboot
+(`sudo firewall-cmd --zone=public --add-service=ssh --add-service=mosh`, a
+runtime-only change) or go back to the previous image
+(`sudo bootc rollback && systemctl reboot`).
 Then, per user:
 
 ```bash
