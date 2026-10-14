@@ -45,4 +45,24 @@ if command -v moshi-hook &>/dev/null && [[ -f "$HOME/.claude/settings.json" ]]; 
     moshi_hook_check || echo "WARNING: could not preview moshi-hook's wanted hooks in a scratch HOME; check by hand."
 fi
 
+# bootc's 3-way merge updates an /etc file only if the machine never changed
+# it, and firewalld rewrites a whole zone file on any `firewall-cmd --permanent`
+# edit. So a security change the image ships in /etc (the tailnet-only ssh
+# zones, key-only sshd, homelab#2194) can silently not apply. Compare the
+# running image's defaults (/usr/etc) with the live copies. Both trees are
+# root-only, hence sudo; like the moshi-hook check this sees the running image,
+# so a just-staged one is checked on the first run after the reboot.
+etc_drift_check() {
+    local f drift
+    drift=$(sudo find /usr/etc/firewalld/zones /usr/etc/ssh/sshd_config.d -type f 2>/dev/null \
+        | while read -r f; do sudo cmp -s "$f" "${f#/usr}" || echo "${f#/usr}"; done)
+    if [[ -n "$drift" ]]; then
+        echo "WARNING: these /etc files differ from the image's copy, so image changes to them do not apply:"
+        echo "$drift" | sed 's/^/  /'
+        echo "  Compare: sudo diff /usr<file> <file>; if nothing local is worth keeping:"
+        echo "  sudo cp /usr<file> <file> (then sudo firewall-cmd --reload or systemctl reload sshd)."
+    fi
+}
+etc_drift_check
+
 echo "system-update done. If bootc staged a new image, reboot to activate it."
