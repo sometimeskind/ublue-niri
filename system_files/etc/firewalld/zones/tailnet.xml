@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The only zone that accepts ssh and mosh (UDP 60000-61000; without it a
+  mosh session hangs right after the SSH handshake): the phone (Moshi) and
+  every other remote client come in over Tailscale (homelab#2194).
+  Bound two ways so it holds whether or not NetworkManager claims tailscale0
+  and assigns it the default zone: by interface, and by the tailnet's address
+  ranges. Source bindings win over interface bindings. The ranges cannot be
+  spoofed in from the wifi: tailscaled's netfilter rules drop 100.64.0.0/10
+  arriving on any other interface, and firewalld's reverse-path filter
+  (IPv6_rpfilter) drops the IPv6 range there.
+-->
+<zone>
+  <short>Tailnet</short>
+  <description>Tailscale peers. Only remote-shell services are accepted.</description>
+  <interface name="tailscale0"/>
+  <source address="100.64.0.0/10"/>
+  <source address="fd7a:115c:a1e0::/48"/>
+  <service name="ssh"/>
+  <service name="mosh"/>
+</zone>
