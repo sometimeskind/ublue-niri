@@ -43,7 +43,9 @@ GitHub Actions builds daily and on push to `main`, publishing to
 - `system-update` — bootc + Flatpak + brew updates in one command, plus a
   `brew bundle install --no-upgrade` pass so a package newly added to the
   dotfiles Brewfile is installed rather than waiting for the next manual
-  `brew bundle`
+  `brew bundle`. It also warns when a firewalld zone or sshd drop-in in `/etc`
+  differs from the image's copy in `/usr/etc` (missing or locally edited), since
+  bootc then keeps the local file and the image's change never applies
 - **make**/**stow** so the dotfiles bootstrap works before brew is installed
 - **gcc**/**gcc-c++**/**glibc-devel** — Homebrew on Linux needs a system C
   toolchain even for bottled formulae (its gcc post-install shells out to
@@ -122,7 +124,8 @@ bound to `tailscale0` and to the tailnet ranges `100.64.0.0/10` and
 `public` zone, which holds the wifi, allows neither. sshd is key-only
 (`/etc/ssh/sshd_config.d/10-key-only.conf`). Both zone files ship in `/etc`,
 so a machine that has edited a zone with `firewall-cmd --permanent` keeps its
-own copy: check with the commands below after an update.
+own copy (`system-update` warns about it): check with the commands below
+after an update.
 
 ```bash
 firewall-cmd --get-active-zones           # tailnet: tailscale0 + the two sources
