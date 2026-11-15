@@ -3,7 +3,7 @@
 Custom [bootc](https://bootc-dev.github.io/bootc/) image for my laptop:
 [Universal Blue base-main](https://github.com/orgs/ublue-os/packages) (DE-less
 Fedora Atomic) + [niri](https://github.com/niri-wm/niri) +
-[Dux Shell](https://duxlabs.dev/docs/dms) (formerly DankMaterialShell, still
+[Dux Shell](https://duxlabs.dev/docs/dms/overview) (formerly DankMaterialShell, still
 `dms` on the command line).
 
 Built from [ublue-os/image-template](https://github.com/ublue-os/image-template).
