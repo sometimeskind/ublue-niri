@@ -147,7 +147,7 @@ Then, per user:
 ```bash
 moshi-hook pair --token <token from Moshi app: Settings -> Hooks>
 moshi-hook service install  # user systemd unit for the daemon
-moshi-hook host setup       # Easy Pair SSH/Mosh access (enables sshd as needed;
+moshi-hook host setup       # Easy Pair SSH/Mosh access (sshd is enabled by the image;
                             # reachability from the phone is via Tailscale)
 ```
 
