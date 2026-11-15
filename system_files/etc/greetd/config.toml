@@ -10,7 +10,7 @@ vt = 1
 command = "niri-session"
 user = "tom"
 
-# dms-greeter renders the DankMaterialShell lock-screen UI as the login
+# dms-greeter renders the Dux Shell lock-screen UI as the login
 # screen and generates the niri config for its own session on the fly, so
 # there is nothing to configure beyond --command. It also sets up the seat,
 # D-Bus and runtime dirs itself, which is what tuigreet's --cmd niri-session
