@@ -19,9 +19,8 @@ on:
     branches:
       - main
     paths:
-      - './disk_config/disk.toml'
-      - './disk_config/iso.toml'
-      - './.github/workflows/build-disk.yml'
+      - 'disk_config/disk.toml'
+      - '.github/workflows/build-disk.yml'
 
 env:
   IMAGE_NAME: ${{ github.event.repository.name }} # output of build.yml, keep in sync
@@ -36,11 +35,13 @@ concurrency:
 jobs:
   build:
     name: Build disk images
-    runs-on: ${{ inputs.platform == 'amd64' && 'ubuntu-26.04' || 'ubuntu-26.04-arm' }}
+    # 24.04, not 26.04: osbuild's mounts fail with EPERM on the 26.04 runners'
+    # 7.0 kernel (https://github.com/osbuild/osbuild/issues/2579).
+    runs-on: ${{ inputs.platform == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
-        disk-type: ["qcow2", "anaconda-iso"]
+        disk-type: ["qcow2"]
     permissions:
       contents: read
       packages: read
@@ -82,11 +83,13 @@ jobs:
         uses: osbuild/bootc-image-builder-action@028e4d28330efe546229eb9cb52aee78174d2347 # main
         with:
           builder-image: ${{ env.BIB_IMAGE }}
-          config-file: ${{ matrix.disk-type == 'anaconda-iso' && './disk_config/iso.toml' || './disk_config/disk.toml' }}
+          config-file: ./disk_config/disk.toml
           image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.DEFAULT_TAG }}
           chown: ${{ env.USER_UID }}:${{ env.USER_GID }}
           types: ${{ matrix.disk-type }}
-          additional-args: --use-librepo=True
+          # Same as the Justfile's _build-bib: base-main's image does not set a
+          # default root filesystem type, so bib refuses without one.
+          additional-args: --use-librepo=True --rootfs=btrfs
 
       - name: Upload disk images and Checksum to Job Artifacts
         if: inputs.upload-to-s3 != true && github.event_name != 'pull_request'
