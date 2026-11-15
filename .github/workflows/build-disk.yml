@@ -35,7 +35,9 @@ concurrency:
 jobs:
   build:
     name: Build disk images
-    runs-on: ${{ inputs.platform == 'arm64' && 'ubuntu-26.04-arm' || 'ubuntu-26.04' }}
+    # 24.04, not 26.04: osbuild's mounts fail with EPERM on the 26.04 runners'
+    # 7.0 kernel (https://github.com/osbuild/osbuild/issues/2579).
+    runs-on: ${{ inputs.platform == 'arm64' && 'ubuntu-24.04-arm' || 'ubuntu-24.04' }}
     strategy:
       fail-fast: false
       matrix:
