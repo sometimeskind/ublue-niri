@@ -5,6 +5,10 @@ set -euo pipefail
 sudo bootc upgrade
 flatpak update -y
 if command -v brew &>/dev/null; then
+    # Homebrew 7 asks before an upgrade whose plan pulls in dependencies; this
+    # command is already the "yes, update everything" step, so don't stop
+    # halfway for a y/n. Covers `brew bundle install` below too.
+    export HOMEBREW_NO_ASK=1
     brew upgrade
     # `brew upgrade` only touches what is already installed, so a package newly
     # added to the dotfiles Brewfile would never land here (homelab#1635).
