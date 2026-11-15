@@ -66,6 +66,13 @@ install -m 755 /tmp/moshi-hook /usr/bin/moshi-hook
 ln -sf moshi-hook /usr/bin/moshi
 rm -f /tmp/moshi-hook.tgz /tmp/moshi-hook
 
+### sshd — inbound SSH/Mosh (mosh bootstraps over ssh). Fedora's presets leave
+### it disabled, and `moshi-hook host setup` only starts it for the current
+### boot, so without this a reboot leaves port 22 closed and Moshi reports
+### "connection refused". Reachability stays tailnet-only via the firewalld
+### zones and key-only via sshd_config.d (see README).
+systemctl enable sshd.service
+
 ### Tailscale — RPM from the vendor repo (disabled after the build like the
 ### others: updates ride image rebuilds). tailscaled is enabled system-wide;
 ### node state lives in /var/lib/tailscale and survives image updates, so a
