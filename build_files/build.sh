@@ -187,30 +187,32 @@ systemctl enable pcscd.socket
 dnf5 install -y tuned-ppd cups-pk-helper kf6-kimageformats
 systemctl enable tuned.service tuned-ppd.service
 
-### DankMaterialShell — quickshell-based desktop shell (bar, launcher, lock,
-### notifications). COPRs enabled for the build only, disabled in the image
-### so machines don't track them outside image rebuilds.
+### Dux Shell (formerly DankMaterialShell): quickshell-based desktop shell
+### (bar, launcher, lock, notifications). COPRs enabled for the build only,
+### disabled in the image so machines don't track them outside image rebuilds.
 #
-# avengemedia/danklinux was already being enabled implicitly: avengemedia/dms
-# declares it as a dependency repo, which is where the installed dgop and
-# quickshell actually came from. Naming it makes dms-greeter and danksearch
-# resolvable without relying on that.
+# Dux Labs took over DMS at 2.0 and moved packaging to the duxlabs/* COPRs at
+# 2.1. The avengemedia/* ones ship the same builds under the old names only
+# until they are retired. The shell package is still called `dms` (binary
+# `dms`, user unit dms.service), and duxlabs/dux-repo carries its deps.
+# Enabling it explicitly makes dux-greeter and dux-search resolvable without
+# relying on dms declaring it as a dependency repo.
 #
-# dms-greeter replaces tuigreet as the greetd session (see
-# system_files/etc/greetd/config.toml); it ships its own sysusers.d and
+# dux-greeter (was dms-greeter; still installs the `dms-greeter` binary)
+# replaces tuigreet as the greetd session (see
+# system_files/etc/greetd/config.toml). It ships its own sysusers.d and
 # tmpfiles.d, so the greeter user and /var/cache/dms-greeter are created at
 # boot rather than needing the fixed-GID dance 1Password needed below.
 #
-# danksearch is the filesystem index behind the DMS launcher's file search.
-# Fedora also ships it, but at 0.1.2 with no systemd unit; the COPR's 1.6.0
-# ships /usr/lib/systemd/user/dsearch.service, and dnf resolves to the higher
-# version.
-dnf5 -y copr enable avengemedia/dms
-dnf5 -y copr enable avengemedia/danklinux
+# dux-search (was danksearch; binary `dsearch`) is the filesystem index behind
+# the launcher's file search, and ships /usr/lib/systemd/user/dsearch.service.
+# Fedora's own danksearch is 0.1.2 with no unit; dux-search obsoletes it.
+dnf5 -y copr enable duxlabs/dms
+dnf5 -y copr enable duxlabs/dux-repo
 dnf5 -y copr enable errornointernet/quickshell
-dnf5 -y install dms quickshell dms-greeter danksearch
-dnf5 -y copr disable avengemedia/dms
-dnf5 -y copr disable avengemedia/danklinux
+dnf5 -y install dms quickshell dux-greeter dux-search
+dnf5 -y copr disable duxlabs/dms
+dnf5 -y copr disable duxlabs/dux-repo
 dnf5 -y copr disable errornointernet/quickshell
 
 ### VS Code — Microsoft repo RPM, baked in so devcontainers (podman) and

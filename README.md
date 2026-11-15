@@ -3,7 +3,8 @@
 Custom [bootc](https://bootc-dev.github.io/bootc/) image for my laptop:
 [Universal Blue base-main](https://github.com/orgs/ublue-os/packages) (DE-less
 Fedora Atomic) + [niri](https://github.com/niri-wm/niri) +
-[DankMaterialShell](https://danklinux.com/docs/dankmaterialshell).
+[Dux Shell](https://duxlabs.dev/docs/dms) (formerly DankMaterialShell, still
+`dms` on the command line).
 
 Built from [ublue-os/image-template](https://github.com/ublue-os/image-template).
 GitHub Actions builds daily and on push to `main`, publishing to
@@ -13,14 +14,15 @@ GitHub Actions builds daily and on push to `main`, publishing to
 ## What's in the image
 
 - **niri** (Fedora repos) with **xwayland-satellite** for X11 clients
-- **DankMaterialShell** + **quickshell** (COPRs `avengemedia/dms`,
-  `errornointernet/quickshell` — enabled at build time only) and **matugen**
-- **greetd + dms-greeter** login on vt1 (`system_files/etc/greetd/config.toml`),
-  auto-logging `tom` into niri on boot (DMS locks the session at startup) —
-  base-main has no display manager or fallback session. dms-greeter renders
-  the DMS lock-screen UI as the login screen and generates its own niri
-  config; `tuigreet` stays installed so swapping `default_session.command`
-  back is the entire rollback
+- **Dux Shell** (`dms`) + **quickshell** (COPRs `duxlabs/dms`,
+  `duxlabs/dux-repo`, `errornointernet/quickshell` — enabled at build time
+  only) and **matugen**
+- **greetd + dux-greeter** (binary `dms-greeter`) login on vt1
+  (`system_files/etc/greetd/config.toml`), auto-logging `tom` into niri on
+  boot (DMS locks the session at startup) — base-main has no display manager
+  or fallback session. dms-greeter renders the DMS lock-screen UI as the
+  login screen and generates its own niri config; `tuigreet` stays installed
+  so swapping `default_session.command` back is the entire rollback
 - **Ptyxis** terminal, **cliphist**/**wl-clipboard**, **zsh**
 - **Nautilus** file manager (+ **gvfs-mtp**) — the one GUI app baked as an
   RPM: not on Flathub, and it needs host gvfs for trash/mounts/phones. The
@@ -31,8 +33,8 @@ GitHub Actions builds daily and on push to `main`, publishing to
   **ddcutil** for external-monitor brightness via DMS. DMS's own screenshot
   action hands off to swappy via `DMS_SCREENSHOT_EDITOR` in
   `system_files/usr/lib/systemd/user/dms.service.d/override.conf`
-- **danksearch** — the filesystem index behind file search in the DMS
-  launcher (`dsearch.service`, enabled per-user)
+- **dux-search** (was danksearch) — the filesystem index behind file search
+  in the DMS launcher (`dsearch.service`, enabled per-user)
 - **udiskie** — removable-media automount as a user service; base-main has no
   desktop environment, so nothing else mounts a USB stick unless Nautilus is
   open
@@ -57,7 +59,8 @@ GitHub Actions builds daily and on push to `main`, publishing to
   with image rebuilds; extensions via the dotfiles Brewfile)
 - A DMS CLI policy (`/usr/share/dms/cli-policy.json`) re-enabling `dms setup`
   on this ostree image — upstream blocks it wholesale on immutable systems;
-  only the greeter subcommands stay blocked (greetd is baked in)
+  only the greeter's `install`/`enable`/`uninstall` stay blocked (greetd is
+  baked in). The standalone `dms-greeter` reads the same file
 - Fonts: CaskaydiaCove Nerd Font (`cascadia-code-nf-fonts`), Inter
   (`rsms-inter-fonts`)
 
