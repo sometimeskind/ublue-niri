@@ -4,7 +4,7 @@ COPY build_files /
 COPY system_files /system_files
 
 # Base Image — Universal Blue base-main (DE-less; niri is the only session)
-FROM ghcr.io/ublue-os/base-main:latest@sha256:cbcb3ea1b82dd92a0fdb0cd80b12292e1676a1f070cfbd0d10ef1ca487db1a71
+FROM ghcr.io/ublue-os/base-main:latest@sha256:cf6a02954e5a2dd0eb8a188f4af1cad02e17488318bfe57dc9d56d5aa275ea48
 ## Other possible base images include:
 # FROM ghcr.io/ublue-os/bazzite:testing
 # FROM ghcr.io/ublue-os/aurora:stable
